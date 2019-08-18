@@ -12,16 +12,16 @@ use Kanboard\Core\Base;
  */
 class ImportTODOProcedure extends BaseProcedure
 {
-	public function importTodoComments($root, $branch, $author, array $comments)
+	public function importTodoComments($root, $branch, $author, $project, array $comments)
 	{
        ///ProjectAuthorization::getInstance($this->container)->check($this->getClassName(), 'importTodoComments', $todoTasks);
 
-        //$project = $this->getProject();
+        $project_id = $this->projectModel->getByName($project)['id'];
 
 		foreach ($comments as $c) {
 			$values = array(
 				'title' => $c['title'],
-                    'project_id' => 1,//$project['id'],
+                    'project_id' => $project_id,
                     //'color_id' => $color_id,
                     //'column_id' => $column_id,
                     //'owner_id' => $owner_id,
