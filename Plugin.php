@@ -2,10 +2,10 @@
 
 namespace Kanboard\Plugin\TdgImport;
 
-use Kanboard\Core\Base;
+use Kanboard\Core\Plugin\Base;
 use Kanboard\Plugin\TdgImport\Api\ImportTODOProcedure;
 
-class TdgImportPlugin extends Base
+class Plugin extends Base
 {
     public function initialize()
     {
@@ -15,11 +15,6 @@ class TdgImportPlugin extends Base
     public function getPluginName()
     {
         return 'TdgImport';
-    }
-
-    public function getPluginDescription()
-    {
-        return t('Import TODO tasks in tdg format');
     }
 
     public function getPluginAuthor()
@@ -35,9 +30,5 @@ class TdgImportPlugin extends Base
     public function getPluginHomepage()
     {
         return 'https://github.com/ribtoks/kanboard-tdg-import';
-    }
-
-    public function getCompatibleVersion() {
-        return '>=1.2.5';
     }
 }
