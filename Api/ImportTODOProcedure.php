@@ -31,6 +31,7 @@ class ImportTODOProcedure extends BaseProcedure
         $categoryToIDMap = $this->createCategoriesMap($project_id, $comments);
         $existingTasks = $this->createExistingTasksMap($project_id);
         $inputTasks = $this->createInputTaskMap($comments);
+        $last_column_id = $this->columnModel->getLastColumnId($project_id);
 
         // add new or update existing tasks
         foreach ($inputTasks as $hash => $c) {
@@ -39,6 +40,26 @@ class ImportTODOProcedure extends BaseProcedure
                 $task_id = $existingTasks[$hash]['id'];
             }
             $this->addTodoComment($c, $project_id, $branch, $categoryToIDMap, $task_id);
+        }
+
+        // close removed tasks
+        foreach ($existingTasks as $hash => $t) {
+            if (array_key_exists($hash, $inputTasks)) {
+                // do nothing, task exists and was update above
+            } else {
+                // assume last column is some sort of 'done'
+                /*$this->taskModificationModel->update(array(
+                    'id' => $t['id'],
+                    'column_id' => $last_column_id
+                ));*/
+                $this->taskPositionModel->movePosition(
+                    $t['project_id'],
+                    $t['id'],
+                    $last_column_id,
+                    $t['position'],
+                    $t['swimlane_id'],
+                    false);
+            }
         }
         return true;
     }
