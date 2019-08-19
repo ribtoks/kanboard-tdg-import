@@ -29,20 +29,31 @@ class ImportTODOProcedure extends BaseProcedure
 
         ProjectAuthorization::getInstance($this->container)->check($this->getClassName(), 'importTodoComments', $project_id);
 
-        $categoryToIDMap = $this->createCategoriesMap($project_id, $comments);
         $existingTasks = $this->createExistingTasksMap($project_id);
         $inputTasks = $this->createInputTaskMap($comments);
-        $last_column_id = $this->columnModel->getLastColumnId($project_id);
 
+        $categoryToIDMap = $this->createCategoriesMap($project_id, $comments);
+        $this->addNewTasks($existingTasks, $inputTasks, $project_id, $branch, $comments);
+        $this->closeMissingTasks($existingTasks, $inputTasks, $branch);
+
+        return true;
+    }
+    
+    private function addNewTasks($existingTasks, $inputTasks, $project_id, $branch, $categoryToIDMap) {
         // add new or update existing tasks that are present in $inputTasks
         foreach ($inputTasks as $hash => $c) {
             $task_id = null;
+            // if the task existed before, we update some properties
             if (array_key_exists($hash, $existingTasks)) {
                 $task_id = $existingTasks[$hash]['id'];
             }
             $this->addTodoComment($c, $project_id, $branch, $categoryToIDMap, $task_id);
         }
-
+    }
+    
+    private function closeMissingTasks($existingTasks, $inputTasks, $branch) {
+        $last_column_id = $this->columnModel->getLastColumnId($project_id);
+        
         // "close" removed tasks by moving to the last column
         // assume last column is some sort of 'done'
         foreach ($existingTasks as $hash => $t) {
@@ -61,7 +72,6 @@ class ImportTODOProcedure extends BaseProcedure
                 }
             }
         }
-        return true;
     }
 
     // task can be closed if it is missing on the same branch as was created
@@ -84,19 +94,18 @@ class ImportTODOProcedure extends BaseProcedure
         }
         return '';
     }
-
-    // adds or updates comment/task
-    private function addTodoComment($c, $project_id, $branch, $categoryToIDMap, $task_id=null) {
-        $reference = $c['file'] . ":" . $c['line'];
+    
+    private function createTaskProperties($comment, $project_id, $branch, $categoryToIDMap, $task_id=null) {
+        $reference = $comment['file'] . ':' . $comment['line'];
 
         $values = array(
-            'title' => $c['title'],
+            'title' =>$comment['title'],
             'project_id' => $project_id,
-            'description' => $c['body'],
+            'description' => $comment['body'],
             'reference' => $reference,
         );
 
-        $color_id = $this->getColorIdForType($c['type']);
+        $color_id = $this->getColorIdForType($comment['type']);
         if ($color_id) {
             $values['color_id'] = $color_id;
         }
@@ -110,18 +119,25 @@ class ImportTODOProcedure extends BaseProcedure
         if ($shouldCreate) {
             $tags = array();
             if ($branch) { $tags[] = '@' . $branch; }
-            if (array_key_exists('issue', $c)) { $tags[] = '#' . $c['issue']; }
+            if (array_key_exists('issue', $comment)) { $tags[] = '#' .$comment['issue']; }
             $values['tags'] = $tags;
         }
 
-        $category = $c['category'];
+        $category = $comment['category'];
         // new categories should have been created beforehand
         if ($category && array_key_exists($category, $categoryToIDMap)) {
             $category_id = $categoryToIDMap[$category];
             $values['category_id'] = $category_id;
         }
+        
+        return $values;
+    }
 
+    // adds or updates comment/task
+    private function addTodoComment($comment, $project_id, $branch, $categoryToIDMap, $task_id=null) {
+        $values = $this->createTaskProperties($comment, $project_id, $branch, $categoryToIDMap, $task_id);
         list($valid, ) = $this->taskValidator->validateCreation($values);
+        $shouldCreate = empty($task_id);
 
         if ($valid) {
             if ($shouldCreate) {
