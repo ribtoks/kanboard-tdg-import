@@ -107,8 +107,10 @@ class ImportTODOProcedure extends BaseProcedure
 
         $shouldCreate = empty($task_id);
 
-        if ($branch && $shouldCreate) {
-            $tags = array('@' . $branch);
+        if ($shouldCreate) {
+            $tags = array();
+            if ($branch) { $tags[] = '@' . $branch; }
+            if (array_key_exists('issue', $c)) { $tags[] = '#' . $c['issue']; }
             $values['tags'] = $tags;
         }
 
