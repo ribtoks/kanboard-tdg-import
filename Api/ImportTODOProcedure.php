@@ -172,12 +172,16 @@ class ImportTODOProcedure extends BaseProcedure
 
         return $categoryToIDMap;
     }
+    
+    private function taskHash($title, $description) {
+        return md5($title . $description);
+    }
 
     private function createExistingTasksMap($project_id) {
         $taskMap = array();
         $tasks = $this->taskFinderModel->getAll($project_id);
         foreach ($tasks as $t) {
-            $hash = md5($t['title'] . $t['description']);
+            $hash = $this->taskHash($t['title'], $t['description']);
             $taskMap[$hash] = $t;
         }
         return $taskMap;
@@ -186,7 +190,7 @@ class ImportTODOProcedure extends BaseProcedure
     private function createInputTaskMap($comments) {
         $taskMap = array();
         foreach ($comments as $c) {
-            $hash = md5($c['title'] . $c['body']);
+            $hash = $this->taskHash($c['title'], $c['body']);
             $taskMap[$hash] = $c;
         }
         return $taskMap;    
