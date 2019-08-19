@@ -1,5 +1,7 @@
 # kanboard-tdg-import
 
+[![Codacy Badge](https://api.codacy.com/project/badge/Grade/7b2d39c4344740f78cbcad265539447b)](https://app.codacy.com/app/ribtoks/kanboard-tdg-import?utm_source=github.com&utm_medium=referral&utm_content=ribtoks/kanboard-tdg-import&utm_campaign=Badge_Grade_Dashboard)
+
 Kanboard plugin to import TODO tasks created by [tdg](https://github.com/ribtoks/tdg)
 
 # About
