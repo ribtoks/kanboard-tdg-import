@@ -13,12 +13,12 @@ In order to get tasks synchronized, you have to create a project in kanboard wit
 
 # Setup
 
-- Install [kanboard](https://github.com/kanboard/kanboard) (recommended options: docker or raspberry pi)
-- Download this plugin from [Releases](https://github.com/ribtoks/kanboard-tdg-import/releases/latest) and extract to `kanboard-root/plugins/` directory
-- Create a kanboard project with the name equal to the name of the project you want to track with standard layout ("TODO", "In progress" and "DONE")
-- From admin user go to global Settings and in the API section copy token and endpoint url.
-- Install [tdg](https://github.com/ribtoks/tdg) using `go get github.com/ribtoks/tdg`
-- Create git post-commit hook that will fetch current comments from source code and send them to kanboard
+-   Install [kanboard](https://github.com/kanboard/kanboard) (recommended options: docker or raspberry pi)
+-   Download this plugin from [Releases](https://github.com/ribtoks/kanboard-tdg-import/releases/latest) and extract to `kanboard-root/plugins/` directory
+-   Create a kanboard project with the name equal to the name of the project you want to track with standard layout ("TODO", "In progress" and "DONE")
+-   From admin user go to global Settings and in the API section copy token and endpoint url.
+-   Install [tdg](https://github.com/ribtoks/tdg) using `go get github.com/ribtoks/tdg`
+-   Create git post-commit hook that will fetch current comments from source code and send them to kanboard
 
 Sample script (replace API token and endpoint with yours):
 
