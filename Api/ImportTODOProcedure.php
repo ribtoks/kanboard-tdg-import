@@ -33,8 +33,8 @@ class ImportTODOProcedure extends BaseProcedure
         $inputTasks = $this->createInputTaskMap($comments);
         $categoryToIDMap = $this->createCategoriesMap($project_id, $comments);
         
-        $this->addNewTasks($existingTasks, $inputTasks, $project_id, $branch, $comments);
-        $this->closeMissingTasks($existingTasks, $inputTasks, $branch);
+        $this->addNewTasks($existingTasks, $inputTasks, $project_id, $branch, $categoryToIDMap);
+        $this->closeMissingTasks($existingTasks, $inputTasks, $project_id, $branch);
 
         return true;
     }
@@ -51,7 +51,7 @@ class ImportTODOProcedure extends BaseProcedure
         }
     }
     
-    private function closeMissingTasks($existingTasks, $inputTasks, $branch) {
+    private function closeMissingTasks($existingTasks, $inputTasks, $project_id, $branch) {
         $last_column_id = $this->columnModel->getLastColumnId($project_id);
         
         // "close" removed tasks by moving to the last column
