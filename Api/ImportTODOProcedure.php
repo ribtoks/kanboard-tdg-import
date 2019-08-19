@@ -31,8 +31,8 @@ class ImportTODOProcedure extends BaseProcedure
 
         $existingTasks = $this->createExistingTasksMap($project_id);
         $inputTasks = $this->createInputTaskMap($comments);
-
         $categoryToIDMap = $this->createCategoriesMap($project_id, $comments);
+        
         $this->addNewTasks($existingTasks, $inputTasks, $project_id, $branch, $comments);
         $this->closeMissingTasks($existingTasks, $inputTasks, $branch);
 
