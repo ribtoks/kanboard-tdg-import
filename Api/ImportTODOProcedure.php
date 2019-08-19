@@ -59,17 +59,15 @@ class ImportTODOProcedure extends BaseProcedure
         foreach ($existingTasks as $hash => $t) {
             if (array_key_exists($hash, $inputTasks)) {
                 // do nothing, task exists and was update above
-            } else {
+            } else if ($this->canTaskBeClosed($t['id'], $branch)) {
                 // task is missing in the input so probably was resolved
-                if ($this->canTaskBeClosed($t['id'], $branch)) {
-                    $this->taskPositionModel->movePosition(
-                        $t['project_id'],
-                        $t['id'],
-                        $last_column_id,
-                        $t['position'],
-                        $t['swimlane_id'],
-                        false);
-                }
+                $this->taskPositionModel->movePosition(
+                    $t['project_id'],
+                    $t['id'],
+                    $last_column_id,
+                    $t['position'],
+                    $t['swimlane_id'],
+                    false);
             }
         }
     }
@@ -95,9 +93,9 @@ class ImportTODOProcedure extends BaseProcedure
         return '';
     }
     
+    // creates a key-value map to be inserted or updated in the table for a single task
     private function createTaskProperties($comment, $project_id, $branch, $categoryToIDMap, $task_id=null) {
         $reference = $comment['file'] . ':' . $comment['line'];
-
         $values = array(
             'title' =>$comment['title'],
             'project_id' => $project_id,
@@ -106,13 +104,8 @@ class ImportTODOProcedure extends BaseProcedure
         );
 
         $color_id = $this->getColorIdForType($comment['type']);
-        if ($color_id) {
-            $values['color_id'] = $color_id;
-        }
-
-        if ($task_id) {
-            $values['id'] = $task_id;
-        }
+        if ($color_id) { $values['color_id'] = $color_id; }
+        if ($task_id) { $values['id'] = $task_id; }
 
         $shouldCreate = empty($task_id);
 
