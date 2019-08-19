@@ -2,6 +2,9 @@
 
 Kanboard plugin to import TODO tasks created by [tdg](https://github.com/ribtoks/tdg)
 
+[![Codacy Badge](https://api.codacy.com/project/badge/Grade/74b89c2442e9474aac12362a2d37cd79)](https://www.codacy.com/app/ribtoks/kanboard-tdg-import)
+[![Maintainability](https://api.codeclimate.com/v1/badges/92fc61f61afcfddf4cde/maintainability)](https://codeclimate.com/github/ribtoks/kanboard-tdg-import/maintainability)
+
 # About
 
 This plugin allows to synchronize tasks based on current TODO/FIXME/BUG comments in the project source code to tasks in [kanboard](https://github.com/kanboard/kanboard). Comments are extracted using [tdg utility](https://github.com/ribtoks/tdg).
