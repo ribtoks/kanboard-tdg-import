@@ -14,6 +14,13 @@ use Kanboard\Core\Base;
  */
 class ImportTODOProcedure extends BaseProcedure
 {
+    protected $typeToColor = array(
+        'TODO' => 'green',
+        'FIXME' => 'yellow',
+        'BUG' => 'red',
+        'HACK' => 'amber',
+    );
+
     public function importTodoComments($root, $branch, $author, $project, array $comments) {
         $project_row = $this->projectModel->getByName($project);
         if (!$project_row) { return false; }
@@ -36,19 +43,28 @@ class ImportTODOProcedure extends BaseProcedure
         return true;
     }
 
+    private function getColorIdForType($type) {
+        if (array_key_exists($type, $this->typeToColor)) {
+            $color = $this->typeToColor[$type];
+            return $this->colorModel->find($color);
+        }
+        return '';
+    }
+
     private function addTodoComment($c, $project_id, $branch, $categoryToIDMap, $task_id=null) {
         $reference = $c['file'] . ":" . $c['line'];
 
         $values = array(
             'title' => $c['title'],
             'project_id' => $project_id,
-            //'color_id' => $color_id,
-            //'column_id' => $column_id,
-            //'owner_id' => $owner_id,
-            //'creator_id' => $creator_id,
             'description' => $c['body'],
             'reference' => $reference,
         );
+
+        $color_id = $this->getColorIdForType($c['type']);
+        if ($color_id) {
+            $values['color_id'] = $color_id;
+        }
 
         if ($task_id) {
             $values['id'] = $task_id;
