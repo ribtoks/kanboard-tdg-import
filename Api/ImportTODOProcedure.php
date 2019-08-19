@@ -21,6 +21,7 @@ class ImportTODOProcedure extends BaseProcedure
         'HACK' => 'amber',
     );
 
+    // main function of this class that does the import
     public function importTodoComments($root, $branch, $author, $project, array $comments) {
         $project_row = $this->projectModel->getByName($project);
         if (!$project_row) { return false; }
@@ -33,7 +34,7 @@ class ImportTODOProcedure extends BaseProcedure
         $inputTasks = $this->createInputTaskMap($comments);
         $last_column_id = $this->columnModel->getLastColumnId($project_id);
 
-        // add new or update existing tasks
+        // add new or update existing tasks that are present in $inputTasks
         foreach ($inputTasks as $hash => $c) {
             $task_id = null;
             if (array_key_exists($hash, $existingTasks)) {
@@ -42,28 +43,40 @@ class ImportTODOProcedure extends BaseProcedure
             $this->addTodoComment($c, $project_id, $branch, $categoryToIDMap, $task_id);
         }
 
-        // close removed tasks
+        // "close" removed tasks by moving to the last column
+        // assume last column is some sort of 'done'
         foreach ($existingTasks as $hash => $t) {
             if (array_key_exists($hash, $inputTasks)) {
                 // do nothing, task exists and was update above
             } else {
-                // assume last column is some sort of 'done'
-                /*$this->taskModificationModel->update(array(
-                    'id' => $t['id'],
-                    'column_id' => $last_column_id
-                ));*/
-                $this->taskPositionModel->movePosition(
-                    $t['project_id'],
-                    $t['id'],
-                    $last_column_id,
-                    $t['position'],
-                    $t['swimlane_id'],
-                    false);
+                // task is missing in the input so probably was resolved
+                if ($this->canTaskBeClosed($t['id'], $branch)) {
+                    $this->taskPositionModel->movePosition(
+                        $t['project_id'],
+                        $t['id'],
+                        $last_column_id,
+                        $t['position'],
+                        $t['swimlane_id'],
+                        false);
+                }
             }
         }
         return true;
     }
 
+    // task can be closed if it is missing on the same branch as was created
+    private function canTaskBeClosed($task_id, $branch) {
+        $tags = $this->taskTagModel->getTagsByTask($task_id);
+        $branchTag = '@' . $branch;
+        foreach ($tags as $tag) {
+            if ($tag['name'] == $branchTag) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    // returns color name for comment type (FIXME/TODO/BUG/etc.)
     private function getColorIdForType($type) {
         if (array_key_exists($type, $this->typeToColor)) {
             $color = $this->typeToColor[$type];
@@ -72,6 +85,7 @@ class ImportTODOProcedure extends BaseProcedure
         return '';
     }
 
+    // adds or updates comment/task
     private function addTodoComment($c, $project_id, $branch, $categoryToIDMap, $task_id=null) {
         $reference = $c['file'] . ":" . $c['line'];
 
@@ -94,11 +108,12 @@ class ImportTODOProcedure extends BaseProcedure
         $shouldCreate = empty($task_id);
 
         if ($branch && $shouldCreate) {
-            $tags = array("@" . $branch);
+            $tags = array('@' . $branch);
             $values['tags'] = $tags;
         }
 
         $category = $c['category'];
+        // new categories should have been created beforehand
         if ($category && array_key_exists($category, $categoryToIDMap)) {
             $category_id = $categoryToIDMap[$category];
             $values['category_id'] = $category_id;
@@ -115,6 +130,8 @@ class ImportTODOProcedure extends BaseProcedure
         }
     }
 
+    // creates missing categories from new categories in comments
+    // and returns map [category_name] -> category_id
     private function createCategoriesMap($project_id, $comments) {
         $categories = array();
         foreach ($comments as $c) {

@@ -31,4 +31,9 @@ class Plugin extends Base
     {
         return 'https://github.com/ribtoks/kanboard-tdg-import';
     }
+
+    public function getCompatibleVersion()
+    {
+        return '>=1.2.5';
+    }
 }
