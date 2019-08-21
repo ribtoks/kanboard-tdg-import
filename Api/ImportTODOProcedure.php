@@ -90,6 +90,8 @@ class ImportTODOProcedure extends BaseProcedure
                         $t['swimlane_id'],
                         false);
                     $closed_count++;
+                } else {
+                    $this->logger->debug("[TODO import] Task cannot be closed id=$task_id");
                 }
             }
         }
