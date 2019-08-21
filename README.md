@@ -7,7 +7,7 @@ Kanboard plugin to import TODO tasks created by [tdg](https://github.com/ribtoks
 
 ## About
 
-This plugin allows to synchronize tasks based on current TODO/FIXME/BUG comments in the project source code to tasks in [kanboard](https://github.com/kanboard/kanboard). Comments are extracted using [tdg utility](https://github.com/ribtoks/tdg).
+This plugin allows to synchronize tasks based on current TODO/FIXME/BUG comments in the project source code to tasks in [kanboard](https://github.com/kanboard/kanboard). Comments are extracted using [tdg](https://github.com/ribtoks/tdg) utility.
 
 In order to get tasks synchronized, you have to create a project in kanboard with name equal to the name of your project. After TODO comment is removed from source code, it is automatically moved to the last column (usually, "Done") in the kanboard project.
 
@@ -36,4 +36,11 @@ Sample script (replace API token and endpoint with yours):
         -d "${PAYLOAD}" \
         "${API_ENDPOINT}"
 
-Now when you run `git commit`, all your comments will be automatically synchronized.
+Now when you run `git commit`, all your comments will be automatically synchronized. Don't forget not to commit your tokens.
+
+## Debugging server-side
+
+-   In order to see fatal errors you can check latest in apache `error.log`
+-   Go to kanboard directory and execute `cp config.default.php to config.php`
+-   Open `config.php` and set `DEBUG` to `true` and `LOG_DRIVER` to `file`
+-   Execute sync and you will be able to grep debug log for `[TODO import]`
