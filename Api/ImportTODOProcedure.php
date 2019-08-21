@@ -74,27 +74,28 @@ class ImportTODOProcedure extends BaseProcedure
             $task_id = $t['id'];
             if (array_key_exists($hash, $inputTasks)) {
                 // do nothing, task exists and was update above
-            } else {
-                if ($t['column_id'] == $last_column_id) {
-                    $this->logger->debug("[TODO import] task is already in the last column id=$task_id");
-                    continue;
-                }
+                continue;
+            }
 
-                if ($this->canTaskBeClosed($t['id'], $branch)) {
-                    $task_title = $t['title'];
-                    $this->logger->debug("[TODO import] closing task id=$task_id title=$task_title");
-                    // task is missing in the input so probably was resolved
-                    $this->taskPositionModel->movePosition(
-                        $t['project_id'],
-                        $t['id'],
-                        $last_column_id,
-                        $t['position'],
-                        $t['swimlane_id'],
-                        false);
-                    $closed_count++;
-                } else {
-                    $this->logger->debug("[TODO import] task cannot be closed id=$task_id");
-                }
+            if ($t['column_id'] == $last_column_id) {
+                $this->logger->debug("[TODO import] task is already in the last column id=$task_id");
+                continue;
+            }
+
+            if ($this->canTaskBeClosed($t['id'], $branch)) {
+                $task_title = $t['title'];
+                $this->logger->debug("[TODO import] closing task id=$task_id title=$task_title");
+                // task is missing in the input so probably was resolved
+                $this->taskPositionModel->movePosition(
+                    $t['project_id'],
+                    $t['id'],
+                    $last_column_id,
+                    $t['position'],
+                    $t['swimlane_id'],
+                    false);
+                $closed_count++;
+            } else {
+                $this->logger->debug("[TODO import] task cannot be closed id=$task_id");
             }
         }
         $this->logger->info("[TODO import] closed missing tasks count=$closed_count");
