@@ -41,6 +41,6 @@ Now when you run `git commit`, all your comments will be automatically synchroni
 ## Debugging server-side
 
 -   In order to see fatal errors you can check latest in apache `error.log`
--   Go to kanboard directory and execute `cp config.default.php to config.php`
+-   Go to kanboard directory and execute `cp config.default.php config.php`
 -   Open `config.php` and set `DEBUG` to `true` and `LOG_DRIVER` to `file`
 -   Execute sync and you will be able to grep debug log for `[TODO import]`
