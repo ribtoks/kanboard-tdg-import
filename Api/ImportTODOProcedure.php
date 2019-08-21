@@ -24,10 +24,10 @@ class ImportTODOProcedure extends BaseProcedure
     // main function of this class that does the import
     public function importTodoComments($root, $branch, $author, $project, array $comments) {
         $comments_count = count($comments);
-        $this->logger->info("[TODO import] Importing comments count=$comments_count project=$project");
+        $this->logger->info("[TODO import] importing comments count=$comments_count project=$project");
         $project_row = $this->projectModel->getByName($project);
         if (!$project_row) {
-            $this->logger->error("[TODO import] Cannot find project name=$project");
+            $this->logger->error("[TODO import] cannot find project name=$project");
             return false;
         }
         $project_id = $project_row['id'];
@@ -41,7 +41,7 @@ class ImportTODOProcedure extends BaseProcedure
         $this->addNewTasks($existingTasks, $inputTasks, $project_id, $branch, $categoryToIDMap);
         $this->closeMissingTasks($existingTasks, $inputTasks, $project_id, $branch);
         
-        $this->logger->info("[TODO import] Import finished");
+        $this->logger->info("[TODO import] import finished");
         return true;
     }
     
@@ -58,7 +58,7 @@ class ImportTODOProcedure extends BaseProcedure
             }
             $this->addTodoComment($c, $project_id, $branch, $categoryToIDMap, $task_id);
         }
-        $this->logger->info("[TODO import] Added new tasks count=$added_count");
+        $this->logger->info("[TODO import] added new tasks count=$added_count");
     }
     
     // moves a task to the last column ('done') in case task is missing from the input tasks
@@ -76,13 +76,13 @@ class ImportTODOProcedure extends BaseProcedure
                 // do nothing, task exists and was update above
             } else {
                 if ($t['column_id'] == $last_column_id) {
-                    $this->logger->debug("[TODO import] Task is already in the last column id=$task_id");
+                    $this->logger->debug("[TODO import] task is already in the last column id=$task_id");
                     continue;
                 }
 
                 if ($this->canTaskBeClosed($t['id'], $branch)) {
                     $task_title = $t['title'];
-                    $this->logger->debug("[TODO import] Closing task id=$task_id title=$task_title");
+                    $this->logger->debug("[TODO import] closing task id=$task_id title=$task_title");
                     // task is missing in the input so probably was resolved
                     $this->taskPositionModel->movePosition(
                         $t['project_id'],
@@ -93,11 +93,11 @@ class ImportTODOProcedure extends BaseProcedure
                         false);
                     $closed_count++;
                 } else {
-                    $this->logger->debug("[TODO import] Task cannot be closed id=$task_id");
+                    $this->logger->debug("[TODO import] task cannot be closed id=$task_id");
                 }
             }
         }
-        $this->logger->info("[TODO import] Closed missing tasks count=$closed_count");
+        $this->logger->info("[TODO import] closed missing tasks count=$closed_count");
     }
 
     // task can be closed if it is missing on the same branch as was created
@@ -118,7 +118,7 @@ class ImportTODOProcedure extends BaseProcedure
             $color = $this->typeToColor[$type];
             return $this->colorModel->find($color);
         } else {
-            $this->logger->warning("[TODO import] Cannot find color for task type=$type");
+            $this->logger->warning("[TODO import] cannot find color for task type=$type");
         }
         return '';
     }
@@ -165,14 +165,14 @@ class ImportTODOProcedure extends BaseProcedure
         if ($valid) {
             $task_title = $values['title'];
             if ($shouldCreate) {
-                $this->logger->debug("[TODO import] Creating task with title=$title");
+                $this->logger->debug("[TODO import] creating task with title=$task_title");
                 $this->taskCreationModel->create($values);
             } else {
-                $this->logger->debug("[TODO import] Updating task with id=$task_id title=$title");
+                $this->logger->debug("[TODO import] updating task with id=$task_id title=$task_title");
                 $this->taskModificationModel->update($values);
             }
         } else {
-            $this->logger->error("[TODO import] Validation failure for task with title=$title");
+            $this->logger->error("[TODO import] validation failure for task with title=$task_title");
         }
     }
 
@@ -201,7 +201,7 @@ class ImportTODOProcedure extends BaseProcedure
                         'project_id' => $project_id,
                         'name' => $category,
                     ));
-                $this->logger->debug("[TODO import] Created new category name=$category id=$id");
+                $this->logger->debug("[TODO import] created new category name=$category id=$id");
                 if ($id) {
                     $categoryToIDMap[$category] = $id;
                 }
@@ -232,7 +232,7 @@ class ImportTODOProcedure extends BaseProcedure
     private function createInputTaskMap($comments) {
         $taskMap = array();
         $comments_count = count($comments);
-        $this->logger->debug("[TODO import] Processing input comments_count=$comments_count");
+        $this->logger->debug("[TODO import] processing input comments_count=$comments_count");
         foreach ($comments as $c) {
             $hash = $this->taskHash($c['title'], $c['body']);
             $taskMap[$hash] = $c;
