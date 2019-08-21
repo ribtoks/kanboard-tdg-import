@@ -48,17 +48,20 @@ class ImportTODOProcedure extends BaseProcedure
     // add new or update existing tasks that are present in $inputTasks
     private function addNewTasks($existingTasks, $inputTasks, $project_id, $branch, $categoryToIDMap) {
         $added_count = 0;
+        $updated_count = 0;
         foreach ($inputTasks as $hash => $c) {
-            $task_id = null;
-            // if the task existed before, we update some properties
             if (array_key_exists($hash, $existingTasks)) {
+                // if the task existed before, we update some properties that might have changed
                 $task_id = $existingTasks[$hash]['id'];
+                $this->updateToDoComment($c, $project_id, $branch, $categoryToIDMap, $task_id);
+                $updated_count++;
             } else {
+                $this->addTodoComment($c, $project_id, $branch, $categoryToIDMap);
                 $added_count++;
             }
-            $this->addTodoComment($c, $project_id, $branch, $categoryToIDMap, $task_id);
         }
         $this->logger->info("[TODO import] added new tasks count=$added_count");
+        $this->logger->info("[TODO import] updated existing tasks count=$updated_count");
     }
     
     // moves a task to the last column ('done') in case task is missing from the input tasks
@@ -125,10 +128,10 @@ class ImportTODOProcedure extends BaseProcedure
     }
     
     // creates a key-value map to be inserted or updated in the table for a single task
-    private function createTaskProperties($comment, $project_id, $branch, $categoryToIDMap, $task_id=null) {
+    private function createTaskProperties($comment, $project_id, $branch, $categoryToIDMap) {
         $reference = $comment['file'] . ':' . $comment['line'];
         $values = array(
-            'title' =>$comment['title'],
+            'title' => $comment['title'],
             'project_id' => $project_id,
             'description' => $comment['body'],
             'reference' => $reference,
@@ -136,16 +139,11 @@ class ImportTODOProcedure extends BaseProcedure
 
         $color_id = $this->getColorIdForType($comment['type']);
         if ($color_id) { $values['color_id'] = $color_id; }
-        if ($task_id) { $values['id'] = $task_id; }
 
-        $shouldCreate = empty($task_id);
-
-        if ($shouldCreate) {
-            $tags = array();
-            if ($branch) { $tags[] = '@' . $branch; }
-            if (array_key_exists('issue', $comment)) { $tags[] = '#' .$comment['issue']; }
-            $values['tags'] = $tags;
-        }
+        $tags = array();
+        if ($branch) { $tags[] = '@' . $branch; }
+        if (array_key_exists('issue', $comment)) { $tags[] = '#' . $comment['issue']; }
+        $values['tags'] = $tags;
 
         $category = $comment['category'];
         // new categories should have been created beforehand
@@ -156,22 +154,31 @@ class ImportTODOProcedure extends BaseProcedure
         
         return $values;
     }
-
-    // adds or updates comment/task
-    private function addTodoComment($comment, $project_id, $branch, $categoryToIDMap, $task_id=null) {
-        $values = $this->createTaskProperties($comment, $project_id, $branch, $categoryToIDMap, $task_id);
+    
+    // updates task
+    private function updateToDoComment($comment, $project_id, $branch, $categoryToIDMap, $task_id) {
+        $values = $this->createTaskProperties($comment, $project_id, $branch, $categoryToIDMap);
+        if ($task_id) { $values['id'] = $task_id; }
         list($valid, ) = $this->taskValidator->validateCreation($values);
-        $shouldCreate = empty($task_id);
         $task_title = $values['title'];
 
         if ($valid) {
-            if ($shouldCreate) {
-                $this->logger->debug("[TODO import] creating task with title=$task_title");
-                $this->taskCreationModel->create($values);
-            } else {
-                $this->logger->debug("[TODO import] updating task with id=$task_id title=$task_title");
-                $this->taskModificationModel->update($values);
-            }
+            $this->logger->debug("[TODO import] updating task with id=$task_id title=$task_title");
+            $this->taskModificationModel->update($values);
+        } else {
+            $this->logger->error("[TODO import] validation failure for task with title=$task_title");
+        }
+    }
+
+    // adds comment/task
+    private function addTodoComment($comment, $project_id, $branch, $categoryToIDMap) {
+        $values = $this->createTaskProperties($comment, $project_id, $branch, $categoryToIDMap);
+        list($valid, ) = $this->taskValidator->validateCreation($values);
+        $task_title = $values['title'];
+
+        if ($valid) {
+            $this->logger->debug("[TODO import] creating task with title=$task_title");
+            $this->taskCreationModel->create($values);
         } else {
             $this->logger->error("[TODO import] validation failure for task with title=$task_title");
         }
