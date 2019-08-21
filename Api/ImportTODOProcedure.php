@@ -45,9 +45,9 @@ class ImportTODOProcedure extends BaseProcedure
         return true;
     }
     
+    // add new or update existing tasks that are present in $inputTasks
     private function addNewTasks($existingTasks, $inputTasks, $project_id, $branch, $categoryToIDMap) {
         $added_count = 0;
-        // add new or update existing tasks that are present in $inputTasks
         foreach ($inputTasks as $hash => $c) {
             $task_id = null;
             // if the task existed before, we update some properties
@@ -61,6 +61,8 @@ class ImportTODOProcedure extends BaseProcedure
         $this->logger->info("[TODO import] Added new tasks count=$added_count");
     }
     
+    // moves a task to the last column ('done') in case task is missing from the input tasks
+    // and task current branch is the same branch where task was initially created
     private function closeMissingTasks($existingTasks, $inputTasks, $project_id, $branch) {
         $last_column_id = $this->columnModel->getLastColumnId($project_id);
         $this->logger->debug("[TODO import] last column id=$last_column_id");
@@ -213,6 +215,7 @@ class ImportTODOProcedure extends BaseProcedure
         return md5($title . $description);
     }
 
+    // creates mapping hash->task from existing tasks
     private function createExistingTasksMap($project_id) {
         $taskMap = array();
         $tasks = $this->taskFinderModel->getAll($project_id);
@@ -225,6 +228,7 @@ class ImportTODOProcedure extends BaseProcedure
         return $taskMap;
     }
 
+    // creates mapping hash->comment from input tasks
     private function createInputTaskMap($comments) {
         $taskMap = array();
         $comments_count = count($comments);
