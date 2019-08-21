@@ -40,7 +40,8 @@ class ImportTODOProcedure extends BaseProcedure
         
         $this->addNewTasks($existingTasks, $inputTasks, $project_id, $branch, $categoryToIDMap);
         $this->closeMissingTasks($existingTasks, $inputTasks, $project_id, $branch);
-
+        
+        $this->logger->info("[TODO import] Import finished");
         return true;
     }
     
