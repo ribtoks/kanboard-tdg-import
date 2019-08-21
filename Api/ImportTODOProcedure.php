@@ -161,9 +161,9 @@ class ImportTODOProcedure extends BaseProcedure
         $values = $this->createTaskProperties($comment, $project_id, $branch, $categoryToIDMap, $task_id);
         list($valid, ) = $this->taskValidator->validateCreation($values);
         $shouldCreate = empty($task_id);
+        $task_title = $values['title'];
 
         if ($valid) {
-            $task_title = $values['title'];
             if ($shouldCreate) {
                 $this->logger->debug("[TODO import] creating task with title=$task_title");
                 $this->taskCreationModel->create($values);
