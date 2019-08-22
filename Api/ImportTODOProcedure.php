@@ -144,6 +144,9 @@ class ImportTODOProcedure extends BaseProcedure
 
         $color_id = $this->getColorIdForType($comment['type']);
         if ($color_id) { $values['color_id'] = $color_id; }
+        
+        $estimate = $comment['estimate'];
+        if ($estimate) { $values['time_estimated'] = $estimate; }
 
         $tags = array();
         if ($branch) { $tags[] = '@' . $branch; }
