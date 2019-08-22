@@ -38,11 +38,13 @@ class ImportTODOProcedure extends BaseProcedure
         $inputTasks = $this->createInputTaskMap($comments);
         $categoryToIDMap = $this->createCategoriesMap($project_id, $comments);
         
-        $this->addNewTasks($existingTasks, $inputTasks, $project_id, $branch, $categoryToIDMap);
-        $this->closeMissingTasks($existingTasks, $inputTasks, $project_id, $branch);
+        $result = $this->addNewTasks($existingTasks, $inputTasks, $project_id, $branch, $categoryToIDMap);
+        $closed_count = $this->closeMissingTasks($existingTasks, $inputTasks, $project_id, $branch);
         
+        $result['closed'] = $closed_count;
+        $result['success'] = true;
         $this->logger->info("[TODO import] import finished");
-        return true;
+        return $result;
     }
     
     // add new or update existing tasks that are present in $inputTasks
@@ -62,6 +64,8 @@ class ImportTODOProcedure extends BaseProcedure
         }
         $this->logger->info("[TODO import] added new tasks count=$added_count");
         $this->logger->info("[TODO import] updated existing tasks count=$updated_count");
+
+        return array('added' => $added_count, 'updated' => $updated_count);
     }
     
     // moves a task to the last column ('done') in case task is missing from the input tasks
@@ -75,6 +79,7 @@ class ImportTODOProcedure extends BaseProcedure
         // assume last column is some sort of 'done'
         foreach ($existingTasks as $hash => $t) {
             $task_id = $t['id'];
+
             if (array_key_exists($hash, $inputTasks)) {
                 // do nothing, task exists and was update above
                 continue;
@@ -102,6 +107,7 @@ class ImportTODOProcedure extends BaseProcedure
             }
         }
         $this->logger->info("[TODO import] closed missing tasks count=$closed_count");
+        return $closed_count;
     }
 
     // task can be closed if it is missing on the same branch as was created
