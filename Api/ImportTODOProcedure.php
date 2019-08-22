@@ -38,11 +38,10 @@ class ImportTODOProcedure extends BaseProcedure
         $inputTasks = $this->createInputTaskMap($comments);
         $categoryToIDMap = $this->createCategoriesMap($project_id, $comments);
         
-        $result = $this->addNewTasks($existingTasks, $inputTasks, $project_id, $branch, $categoryToIDMap);
-        $closed_count = $this->closeMissingTasks($existingTasks, $inputTasks, $project_id, $branch);
+        $added = $this->addNewTasks($existingTasks, $inputTasks, $project_id, $branch, $categoryToIDMap);
+        $closed = $this->closeMissingTasks($existingTasks, $inputTasks, $project_id, $branch);
         
-        $result['closed'] = $closed_count;
-        $result['success'] = true;
+        $result = array_merge($added, $closed, array('success' => true));
         $this->logger->info("[TODO import] import finished");
         return $result;
     }
@@ -107,7 +106,7 @@ class ImportTODOProcedure extends BaseProcedure
             }
         }
         $this->logger->info("[TODO import] closed missing tasks count=$closed_count");
-        return $closed_count;
+        return array('closed' => $closed_count);
     }
 
     // task can be closed if it is missing on the same branch as was created
