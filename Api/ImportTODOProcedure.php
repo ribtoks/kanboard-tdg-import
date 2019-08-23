@@ -167,6 +167,8 @@ class ImportTODOProcedure extends BaseProcedure
     private function updateToDoComment($comment, $project_id, $branch, $categoryToIDMap, $task_id) {
         $values = $this->createTaskProperties($comment, $project_id, $branch, $categoryToIDMap);
         if ($task_id) { $values['id'] = $task_id; }
+        // we do not want to update original branch and issue
+        unset($values['tags']);
         list($valid, ) = $this->taskValidator->validateCreation($values);
         $task_title = $values['title'];
 
