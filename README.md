@@ -13,6 +13,8 @@ This plugin allows to synchronize tasks based on current `TODO`/`FIXME`/`BUG` co
 
 In order to get tasks synchronized, you have to create a project in kanboard with name equal to the name of your project. After TODO comment is removed from source code, it is automatically moved to the last column (usually, "Done") in the kanboard project.
 
+You can read about history and reasoning in [this blogpost](https://codejamming.org/2019/how-to-return-to-flow).
+
 ## Setup
 
 -   Install [kanboard](https://github.com/kanboard/kanboard) (recommended options: docker or raspberry pi)
