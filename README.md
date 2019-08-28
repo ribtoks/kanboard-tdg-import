@@ -22,7 +22,7 @@ You can read about history and reasoning in [this blogpost](https://codejamming.
 
 directory hierarchy should look as follows:
 
-~~~
+```
 .
 ├── plugins
 │   └── TdgImport
@@ -30,7 +30,7 @@ directory hierarchy should look as follows:
 │       │   └── ImportTODOProcedure.php
 │       ├── Plugin.php
 │       └── README.md
-~~~
+```
 
 
 
