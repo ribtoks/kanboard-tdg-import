@@ -19,6 +19,21 @@ You can read about history and reasoning in [this blogpost](https://codejamming.
 
 -   Install [kanboard](https://github.com/kanboard/kanboard) (recommended options: docker or raspberry pi)
 -   Download this plugin from [Releases](https://github.com/ribtoks/kanboard-tdg-import/releases/latest) and extract to `kanboard-root/plugins/` directory
+
+directory hierarchy should look as follows:
+
+~~~
+.
+├── plugins
+│   └── TdgImport
+│       ├── Api
+│       │   └── ImportTODOProcedure.php
+│       ├── Plugin.php
+│       └── README.md
+~~~
+
+
+
 -   Create a kanboard project with the name equal to the name of the project you want to track with standard layout ("TODO", "In progress" and "DONE")
 -   From admin user go to global Settings and in the API section copy token and endpoint url.
 -   Install [tdg](https://github.com/ribtoks/tdg) using `go get github.com/ribtoks/tdg`
@@ -27,14 +42,14 @@ You can read about history and reasoning in [this blogpost](https://codejamming.
 Sample script (replace API token and endpoint with yours):
 
     #!/bin/bash
-
+    
     API_TOKEN='your-api-token-here'
     API_ENDPOINT='http://192.168.1.100/kanboard/jsonrpc.php'
-
+    
     JSON_OUT=`tdg -root /path/to/project/root -include "\.cpp$"`
-
+    
     PAYLOAD="{\"jsonrpc\": \"2.0\", \"id\": 123456789, \"method\": \"importTodoComments\", \"params\": ${JSON_OUT}}"
-
+    
     curl \
         -u "jsonrpc:${API_TOKEN}" \
         -d "${PAYLOAD}" \
