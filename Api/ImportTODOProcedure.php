@@ -145,8 +145,7 @@ class ImportTODOProcedure extends BaseProcedure
         $color_id = $this->getColorIdForType($comment['type']);
         if ($color_id) { $values['color_id'] = $color_id; }
         
-        $estimate = $comment['estimate'];
-        if ($estimate) { $values['time_estimated'] = $estimate; }
+        if (array_key_exists('estimate', $comment)) { $values['time_estimated'] = $comment['estimate']; }
 
         $tags = array();
         if ($branch) { $tags[] = '*' . $branch; }
@@ -154,7 +153,8 @@ class ImportTODOProcedure extends BaseProcedure
         if (array_key_exists('author', $comment)) { $tags[] = '@' . $comment['author']; }
         $values['tags'] = $tags;
 
-        $category = $comment['category'];
+        $category = '';
+        if (array_key_exists('category', $comment)) { $category = $comment['category']; }
         // new categories should have been created beforehand
         if ($category && array_key_exists($category, $categoryToIDMap)) {
             $category_id = $categoryToIDMap[$category];
