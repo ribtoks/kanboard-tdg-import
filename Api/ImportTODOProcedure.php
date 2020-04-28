@@ -112,7 +112,7 @@ class ImportTODOProcedure extends BaseProcedure
     // task can be closed if it is missing on the same branch as was created
     private function canTaskBeClosed($task_id, $branch) {
         $tags = $this->taskTagModel->getTagsByTask($task_id);
-        $branchTag = '@' . $branch;
+        $branchTag = '*' . $branch;
         foreach ($tags as $tag) {
             if ($tag['name'] == $branchTag) {
                 return true;
@@ -149,8 +149,9 @@ class ImportTODOProcedure extends BaseProcedure
         if ($estimate) { $values['time_estimated'] = $estimate; }
 
         $tags = array();
-        if ($branch) { $tags[] = '@' . $branch; }
+        if ($branch) { $tags[] = '*' . $branch; }
         if (array_key_exists('issue', $comment)) { $tags[] = '#' . $comment['issue']; }
+        if (array_key_exists('author', $comment)) { $tags[] = '@' . $comment['author']; }
         $values['tags'] = $tags;
 
         $category = $comment['category'];
